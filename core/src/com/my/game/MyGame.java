@@ -3,6 +3,7 @@ package com.my.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -13,8 +14,12 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
@@ -32,6 +37,8 @@ public class MyGame extends ApplicationAdapter implements InputProcessor {
 	OrthographicCamera camera;
 	MouseJoint joint;
 	MouseJointDef jointDef;
+	Fixture fixture;
+	Sound sound;
 
 	private class TouchInfo {
 		int x, y;
@@ -56,16 +63,18 @@ public class MyGame extends ApplicationAdapter implements InputProcessor {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyDef.BodyType.DynamicBody;
 		bodyDef.position.set(0,0);
-		Body body = world.createBody(bodyDef);
+		final Body body = world.createBody(bodyDef);
 		CircleShape circle = new CircleShape();
 		circle.setRadius(0.6f);
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = circle;
-		fixtureDef.density = 1f;
+		fixtureDef.density = 0.5f;
 		fixtureDef.friction = 0.4f;
-		fixtureDef.restitution = 0.6f;
-		Fixture fixture = body.createFixture(fixtureDef);
+		fixtureDef.restitution = 0.8f;
+		fixture = body.createFixture(fixtureDef);
 		circle.dispose();
+
+		sound = Gdx.audio.newSound(Gdx.files.internal("sounds/pop.mp3"));
 
 		bodyDef = new BodyDef();
 		bodyDef.type = BodyDef.BodyType.StaticBody;
@@ -93,6 +102,30 @@ public class MyGame extends ApplicationAdapter implements InputProcessor {
 		jointDef.bodyA = groundBody;
 		jointDef.collideConnected = true;
 		jointDef.maxForce = 500;
+
+		world.setContactListener(new ContactListener() {
+			@Override
+			public void beginContact(Contact contact) {
+				if (contact.getFixtureA() == fixture || contact.getFixtureB() == fixture){
+					sound.play();
+				}
+			}
+
+			@Override
+			public void endContact(Contact contact) {
+
+			}
+
+			@Override
+			public void preSolve(Contact contact, Manifold oldManifold) {
+
+			}
+
+			@Override
+			public void postSolve(Contact contact, ContactImpulse impulse) {
+
+			}
+		});
 	}
 
 	@Override
@@ -104,6 +137,7 @@ public class MyGame extends ApplicationAdapter implements InputProcessor {
 		batch.end();
 
 		debugRenderer.render(world,camera.combined);
+		world.setGravity(new Vector2(-Gdx.input.getAccelerometerX(),-Gdx.input.getAccelerometerY()));
 		world.step(1/30f, 6, 2);
 
 	}
