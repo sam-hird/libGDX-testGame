@@ -13,7 +13,7 @@ public class MyGame extends Game {
 
 	@Override
 	public void create () {
-		gameSkin = new Skin(Gdx.files.internal("skins/default/uiskin.json"));
+		gameSkin = new Skin(Gdx.files.internal("skins/flat-earth/flat-earth-ui.json"));
 		setScreen(new MainMenu(this));
 	}
 

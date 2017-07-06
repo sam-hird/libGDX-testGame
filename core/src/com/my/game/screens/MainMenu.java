@@ -27,6 +27,7 @@ public class MainMenu implements Screen {
 
         Label title = new Label("Main Menu",((MyGame)game).getGameSkin());
         title.setAlignment(Align.center);
+        title.setFontScale(5);
         title.setY(Gdx.graphics.getHeight()*2/3);
         title.setWidth(Gdx.graphics.getWidth());
         stage.addActor(title);
